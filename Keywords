@@ -1,2 +1,37 @@
 This is a list of key words that we will use:
 
+BASE:
+
+
+
+
+
+
+1:
+haskell:
+  [x y | x <- xs, y <- ys]
+
+INPUT A B CREATE a1 a2 PERM b1 b2
+
+2:
+INPUT 
+
+A:
+1 , 2
+1 , 2
+
+B:
+3 , 4
+3 , 4
+
+out:
+1 , 2 , 3 , 4
+1 , 2 , 3 , 4
+1 , 2 , 3 , 4
+1 , 2 , 3 , 4
+
+SPECIAL CHAR: ඞ
+SPECIAL CHAR: ඞ
+SPECIAL CHAR: ඞ
+SPECIAL CHAR: ඞ
+mung us
