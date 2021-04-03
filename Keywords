@@ -1,37 +1,63 @@
-This is a list of key words that we will use:
+Informal Format:
 
-BASE:
+INPUT     - [File name] : [1st Column key], ..., [nth Column key];
+OUT       - [Column key], [Column key], ..., [Column key]
+WHERE     - [Condition],
+?         - [Condition] ? [Column key] : [Column key],
+NOTHING   - [An empty cell]
 
+Condition - ([Column key] [Comparison Operator] [Column key])
+Comparison Operator - [==, !=]
+    == - [Column key] == [Column key]
+    != - [Column key] != [Column key]
+    
+BNF Grammer:
 
+<program>       ::= INPUT <input> <where> OUT <out> |
+                    INPUT <input> OUT <out>
 
+<input>         ::= <csv_file>; | 
+                    <csv_file>; <input>;
+<csv_file>      ::= <file_name> : <keys>
+<file_name>     ::= <characters>.csv | 
+                    <characters>
 
+<out>           ::= <output_keys>
+<output_keys>   ::= <key> |
+                    <inline_if> | 
+                    <output_keys>, <output_keys>
 
+<keys>          ::= <key> | 
+                    <key>, <keys>
+<key>           ::= <lowercase><letters>
 
-1:
-haskell:
-  [x y | x <- xs, y <- ys]
+<where>         ::= WHERE <condition>
 
-INPUT A B CREATE a1 a2 PERM b1 b2
+<inline_if>     ::= <condition> ? <key> : <key>
 
-2:
-INPUT 
+<condition>     ::= <operand> <condition_op> <operand>
+<operand>       ::= <key> |
+                    <string> | 
+                    NOTHING
+<condition_op>  ::= == |
+                    !=
 
-A:
-1 , 2
-1 , 2
+<string>        ::= "<characters>"
 
-B:
-3 , 4
-3 , 4
+<characters>    ::= <character> | 
+                    <character> <characters>
+<character>     ::= <letter> | 
+                    <digit> | 
+                    <symbol>
+<letters>       ::= <letter> | 
+                    <letter> <letters>
+<letter>        ::= <uppercase_letter> | 
+                    <lowercase_letter>
 
-out:
-1 , 2 , 3 , 4
-1 , 2 , 3 , 4
-1 , 2 , 3 , 4
-1 , 2 , 3 , 4
-
-SPECIAL CHAR: ඞ
-SPECIAL CHAR: ඞ
-SPECIAL CHAR: ඞ
-SPECIAL CHAR: ඞ
-mung us
+<uppercase_letter> ::= A | B | C | D | E | F | G | H | I | J | K | L | M |
+                       N | O | P | Q | R | S | T | U | V | W | X | Y | Z
+<lowercase_letter> ::= a | b | c | d | e | f | g | h | i | j | k | l | m | 
+                       n | o | p | q | r | s | t | u | v | w | x | y | z
+<digit>  ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+<symbol> ::=  | | ! | # | $ | % | & | ( | ) | * | + | , | - | . | / | : |
+              ; | > | = | < | ? | @ | [ | \ | ] | ^ | _ | ` | { | } | ~
