@@ -1,35 +1,57 @@
 { 
-module Tokens where 
+module Lexer where 
 }
 
+
+
 %wrapper "basic" 
-$digit = 0-9     
--- digits 
-$alpha = [a-zA-Z]    
--- alphabetic characters
+
+--digits 
+$digit = 0-9
+
+--alphabetic characters
+$alpha = [a-zA-Z]
+
+--identifiers
+$identifier = $alpha [$alpha $digit \_ \’]*
+
+
 
 tokens :-
-  $white+       ; 
-  "--".*        ; 
-  INPUT         { \s -> TokenInput } 
-  OUT           { \s -> TokenOut }
-  WHERE         { \s -> TokenWhere }
-  \?            { \s -> TokenInlineIf }
-  NOTHING       { \s -> TokenNothing }
-  \==           { \s -> TokenEq }
-  \!=           { \s -> TokenNEq }
-  $alpha [$alpha $digit \_ \’]*   { \s -> TokenVar s } 
+  $white+          ; 
+  "--".*           ; 
+  INPUT            { \s -> TokenInput } 
+  OUT              { \s -> TokenOut }
+  WHERE            { \s -> TokenWhere }
+  NOTHING          { \s -> TokenNothing }
+  $identifier      { \s -> TokenVar s }
+  $identifier\.csv { \s -> TokenFilename s }
+  [a-z]*$alpha     { \s -> TokenKey s }
+  \?               { \s -> TokenQMark }
+  \:               { \s -> TokenColon }             --hehe colon
+  \;               { \s -> TokenSColon }            --hehe colon
+  \,               { \s -> TokenComma }
+  \==              { \s -> TokenEq }
+  \!=              { \s -> TokenNEq }
+
+
 
 { 
 -- Each action has type :: String -> Token 
 -- The token type: 
 data Token = 
-  TokenInput        | 
-  TokenOut          | 
-  TokenWhere        |
-  TokenInlineIf     |
-  TokenNothing      |
-  TokenEq           |
-  TokenNEq
+  TokenInput           | 
+  TokenOut             | 
+  TokenWhere           |
+  TokenNothing         |
+  TokenVar String      |
+  TokenFilename String |
+  TokenKey String      |
+  TokenQMark           |
+  TokenColon           |
+  TokenSColon          |
+  TokenComma           |
+  TokenEq              |
+  TokenNEq             
   deriving (Eq,Show) 
 }
