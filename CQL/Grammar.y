@@ -25,7 +25,7 @@ import Tokens
   ':' {TokenColon}
   ';' {TokenSColon}
   ',' {TokenComma}
-  '=' {TokenEq}
+  "==" {TokenEq}                   --idk how to match multiple symbols
   "!=" {TokenNEq}
 
 
@@ -44,30 +44,32 @@ import Tokens
 --all these productions will need actions
 
 %%
-Prog : input InputExp WhereExp out OutExp
-     | input InputExp out OutExp
+Prog : input InputExp WhereExp out OutExp    {}
+     | input InputExp out OutExp             {}
 
-InputExp : CSV_File ';' InputExp
-         | CSV_File ';'
+InputExp : CSV_File ';' InputExp             {}
+         | CSV_File ';'                      {}
 
-OutExp : OutExp ',' OutExp
-       | InlineIf
-       | key
+OutExp : OutExp ',' OutExp                   {}
+       | InlineIf                            {}
+       | key                                 {}
 
-CSV_File : filename ':' Keys
+CSV_File : filename ':' Keys                 {}
 
-Keys : key ',' Keys
-     | key
+Keys : key ',' Keys                          {}
+     | key                                   {}
 
-WhereExp : 
+WhereExp : where Condition                   {}
 
-InlineIf : Condition '?' key ':' key
+InlineIf : Condition '?' key ':' key         {}
 
-Condition : 
+Condition : Operand ConditionOp Operand      {}
 
-ConditionOp : 
+ConditionOp : "=="                           {}
+            | "!="                           {}
 
-Operand : 
+Operand : key                                {}
+        | nothing                            {}
 
 
 
@@ -76,4 +78,6 @@ Operand :
 {
 parseError :: [Token] -> a
 parseError _ = error "Parse Error"
+
+
 }

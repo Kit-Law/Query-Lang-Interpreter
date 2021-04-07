@@ -13,26 +13,26 @@ $digit = 0-9
 $alpha = [a-zA-Z]
 
 --identifiers
-$identifier = $alpha [$alpha $digit \_ \’]*
+$ident = [a-zA-Z][a-zA-Z0-9\_\’]*
 
 
 
 tokens :-
-  $white+          ; 
-  "--".*           ; 
-  INPUT            { \s -> TokenInput } 
-  OUT              { \s -> TokenOut }
-  WHERE            { \s -> TokenWhere }
-  NOTHING          { \s -> TokenNothing }
-  $identifier      { \s -> TokenVar s }
-  $identifier\.csv { \s -> TokenFilename s }
-  [a-z]*$alpha     { \s -> TokenKey s }
-  \?               { \s -> TokenQMark }
-  \:               { \s -> TokenColon }             --hehe colon
-  \;               { \s -> TokenSColon }            --hehe colon
-  \,               { \s -> TokenComma }
-  \==              { \s -> TokenEq }
-  \!=              { \s -> TokenNEq }
+  $white+           ; 
+  "--".*            ; 
+  INPUT             { \s -> TokenInput } 
+  OUT               { \s -> TokenOut }
+  WHERE             { \s -> TokenWhere }
+  NOTHING           { \s -> TokenNothing }
+  $ident            { \s -> TokenVar s }
+  $ident\.csv       { \s -> TokenFilename s }
+  [a-z]*$alpha      { \s -> TokenKey s }
+  \?                { \s -> TokenQMark }
+  \:                { \s -> TokenColon }             --hehe colon
+  \;                { \s -> TokenSColon }            --hehe colon
+  \,                { \s -> TokenComma }
+  "=="              { \s -> TokenEq }
+  "!="              { \s -> TokenNEq }
 
 
 
