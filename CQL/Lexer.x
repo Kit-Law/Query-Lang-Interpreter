@@ -52,4 +52,3 @@ data Token =
   TokenEq              |
   TokenNEq             
   deriving (Eq,Show) 
-}

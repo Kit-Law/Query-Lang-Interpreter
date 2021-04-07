@@ -102,4 +102,3 @@ data Operand = Key | Nothing
 data ConditionOp = Eq | NEq
 
 type Nothing = ""
-}
