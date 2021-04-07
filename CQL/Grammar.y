@@ -18,12 +18,13 @@ import Tokens
   out {TokenOut}
   where {TokenWhere}
   nothing {TokenNothing}
+  var {TokenVar $$}
   filename {TokenFilename $$}
   key {TokenKey $$}
   '?' {TokenQMark}
-  ':' {TokenHasColumns}
-  ';' {TokenTerminator}
-  ',' {TokenKeySep}
+  ':' {TokenColon}
+  ';' {TokenSColon}
+  ',' {TokenComma}
   "==" {TokenEq}                   --idk how to match multiple symbols
   "!=" {TokenNEq}
 
@@ -58,17 +59,17 @@ CSV_File : filename ':' Keys                 {}
 Keys : key ',' Keys                          {}
      | key                                   {}
 
-WhereExp : where Condition                   {}
+WhereExp : where Condition                   {Where $1}
 
-InlineIf : Condition '?' key ':' key         {}
+InlineIf : Condition '?' key ':' key         {InlineIf $1 $3 $5}
 
-Condition : Operand ConditionOp Operand      {}
+Condition : Operand ConditionOp Operand      {Condition $1 $2 $3}
 
-ConditionOp : "=="                           {}
-            | "!="                           {}
+ConditionOp : "=="                           {ConditionOp Eq}
+            | "!="                           {ConditionOp NEq}
 
-Operand : key                                {}
-        | nothing                            {}
+Operand : key                                {Operand $1}
+        | nothing                            {Operand Nothing}
 
 
 
@@ -78,5 +79,13 @@ Operand : key                                {}
 parseError :: [Token] -> a
 parseError _ = error "Parse Error"
 
+data Where = Condition
 
+data InlineIf = Condition Key Key
+
+data Condition = Operand ConditionOp Operand
+data Operand = Key | Nothing
+data ConditionOp = Eq | NEq
+
+type Nothing = ""
 }
