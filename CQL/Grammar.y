@@ -18,13 +18,12 @@ import Tokens
   out {TokenOut}
   where {TokenWhere}
   nothing {TokenNothing}
-  var {TokenVar $$}
   filename {TokenFilename $$}
   key {TokenKey $$}
   '?' {TokenQMark}
-  ':' {TokenColon}
-  ';' {TokenSColon}
-  ',' {TokenComma}
+  ':' {TokenHasColumns}
+  ';' {TokenTerminator}
+  ',' {TokenKeySep}
   "==" {TokenEq}                   --idk how to match multiple symbols
   "!=" {TokenNEq}
 
@@ -44,20 +43,20 @@ import Tokens
 --all these productions will need actions
 
 %%
-Prog : input InputExp WhereExp out OutExp    {}
-     | input InputExp out OutExp             {}
+Prog : input InputExp WhereExp out OutExp    {$2 $3 $5}
+     | input InputExp out OutExp             {$2 $4}
 
-InputExp : CSV_File ';' InputExp             {}
-         | CSV_File ';'                      {}
+InputExp : CSV_File ';' InputExp             {Input $1 $3}
+         | CSV_File ';'                      {Input $1}
 
-OutExp : OutExp ',' OutExp                   {}
-       | InlineIf                            {}
-       | key                                 {}
+OutExp : OutExp ',' OutExp                   {Output $1 $3}
+       | InlineIf                            {Output $1}
+       | key                                 {Output $1}
 
-CSV_File : filename ':' Keys                 {}
+CSV_File : filename ':' Keys                 {CsvFile $1 $3}
 
-Keys : key ',' Keys                          {}
-     | key                                   {}
+Keys : key ',' Keys                          {Keys $1 $3}
+     | key                                   {Key $1}
 
 WhereExp : where Condition                   {Where $1}
 
@@ -79,10 +78,20 @@ Operand : key                                {Operand $1}
 parseError :: [Token] -> a
 parseError _ = error "Parse Error"
 
+
+data Prog = Input Output | Input Where Output
+
+data Input = CsvFile Input | CsvFile
+data Output = Output Output | InlineIf | Key
+
+data CsvFile = Filename Keys
+type Filename = String
+
+data Keys = Key Keys | Key
+type Key = String
+
 data Where = Condition
-
 data InlineIf = Condition Key Key
-
 data Condition = Operand ConditionOp Operand
 data Operand = Key | Nothing
 data ConditionOp = Eq | NEq
