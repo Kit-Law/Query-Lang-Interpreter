@@ -24,13 +24,12 @@ tokens :-
   OUT               	 { \s -> TokenOut }
   WHERE             	 { \s -> TokenWhere }
   NOTHING           	 { \s -> TokenNothing }
-  $alpha $alNum*         { \s -> TokenVar s }
-  $alpha $alNum*\.csv    { \s -> TokenFilename s }
-  [a-z]*$alpha      	 { \s -> TokenKey s }
+  $alNum*\.csv           { \s -> TokenFilename s }
+  [a-z]$alNum*      	 { \s -> TokenKey s }
   \?                	 { \s -> TokenQMark }
-  \:                	 { \s -> TokenColon }             --hehe colon
-  \;                	 { \s -> TokenSColon }            --hehe colon
-  \,                	 { \s -> TokenComma }
+  \:                	 { \s -> TokenHasColumns }
+  \;                	 { \s -> TokenTerminator }
+  \,                	 { \s -> TokenKeySep }
   "=="              	 { \s -> TokenEq }
   "!="              	 { \s -> TokenNEq }
 
@@ -44,13 +43,12 @@ data Token =
   TokenOut             | 
   TokenWhere           |
   TokenNothing         |
-  TokenVar String      |
   TokenFilename String |
   TokenKey String      |
   TokenQMark           |
-  TokenColon           |
-  TokenSColon          |
-  TokenComma           |
+  TokenHasColumns      |
+  TokenTerminator      |
+  TokenKeySep          |
   TokenEq              |
   TokenNEq             
   deriving (Eq,Show) 
