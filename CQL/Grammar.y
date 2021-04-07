@@ -18,13 +18,12 @@ import Tokens
   out {TokenOut}
   where {TokenWhere}
   nothing {TokenNothing}
-  var {TokenVar $$}
   filename {TokenFilename $$}
   key {TokenKey $$}
   '?' {TokenQMark}
-  ':' {TokenColon}
-  ';' {TokenSColon}
-  ',' {TokenComma}
+  ':' {TokenHasColumns}
+  ';' {TokenTerminator}
+  ',' {TokenKeySep}
   "==" {TokenEq}                   --idk how to match multiple symbols
   "!=" {TokenNEq}
 
