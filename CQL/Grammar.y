@@ -2,7 +2,7 @@
 
 {
 module Grammar where
-import Tokens
+import Lexer
 }
 
 
@@ -31,7 +31,12 @@ import Tokens
 
 --space for associations
 
-
+%nonassoc input out where
+%left ';'
+%left nothing filename key
+%left '?'
+%left "==" "!="
+%left ':' ','
 
 
 
@@ -79,7 +84,7 @@ parseError :: [Token] -> a
 parseError _ = error "Parse Error"
 
 
-data Prog = Input Output | Input Where Output
+data Prog = ProgNoWhere Input Output | ProgWhere Input Where Output
 
 data Input = CsvFile Input | CsvFile
 data Output = Output Output | InlineIf | Key
