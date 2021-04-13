@@ -1,6 +1,7 @@
 module Evaluator where
+import Grammar
 
-type table = ([String], [[String]])
+type Table = ([String], [[String]])
 
 {-|
 Function    : eval
@@ -11,7 +12,7 @@ Maintainer  : Christopher Lawrence
               cl5g19@soton.ac.uk
 Portability : WOCA
 -}
-eval ::
+--eval ::
 
 {-|
 Function    : evalFiles
@@ -22,7 +23,9 @@ Maintainer  : Christopher Lawrence
               cl5g19@soton.ac.uk
 Portability : WOCA
 -}
-evalFiles :: -> table
+evalFiles :: Input -> Table
+evalFiles (csvFile rest) = [((fst xs ++ fst ys), (snd xs) (snd ys)) | xs <- evalFile csvFile, ys <- evalFiles rest]
+evalFiles csvFile = evalFile csvFile
 
 {-|
 Function    : evalFile
@@ -33,7 +36,11 @@ Maintainer  : Christopher Lawrence
               cl5g19@soton.ac.uk
 Portability : WOCA
 -}
-evalFile :: -> table
+evalFile :: CsvFile -> Table
+evalFile filename keys = do file <- readFile filename
+                            let ls = lines file
+                            let tokens = map (splitOn ",") ls
+                            return (keys, tokens)
 
 {-|
 Function    : evalWhere
@@ -44,7 +51,8 @@ Maintainer  : Christopher Lawrence
               cl5g19@soton.ac.uk
 Portability : WOCA
 -}
-evalWhere :: table -> table
+evalWhere :: Table -> Condition -> Table
+evalWhere (keys, contents) condition = (keys, (filter condition contents))
 
 {-|
 Function    : evalOut 
@@ -55,4 +63,5 @@ Maintainer  : Christopher Lawrence
               cl5g19@soton.ac.uk
 Portability : WOCA
 -}
-evalOut :: mappings -> 
+evalOut :: Table -> Output -> [[String]]
+evalOut (keys, contents)@table (o1, o2) = evalOut table --TODO: fix this lol
