@@ -1,7 +1,7 @@
 module Evaluator where
 import Grammar
 
-type Table = ([String], [[String]])
+type Table = (Keys, [[String]])
 
 {-|
 Function    : eval
@@ -39,8 +39,8 @@ Portability : WOCA
 evalFile :: CsvFile -> Table
 evalFile filename keys = do file <- readFile filename
                             let ls = lines file
-                            let tokens = map (splitOn ",") ls
-                            return (keys, tokens)
+                            let contents = map (splitOn ",") ls
+                            return (keys, contents)
 
 {-|
 Function    : evalWhere
@@ -51,8 +51,8 @@ Maintainer  : Christopher Lawrence
               cl5g19@soton.ac.uk
 Portability : WOCA
 -}
-evalWhere :: Table -> Condition -> Table
-evalWhere (keys, contents) condition = (keys, (filter condition contents))
+evalWhere :: Table -> Where -> Table
+evalWhere (keys, contents) condition = (keys, (filter condition contents)) --TODO: make this 
 
 {-|
 Function    : evalOut 
