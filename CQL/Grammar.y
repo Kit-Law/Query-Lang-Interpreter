@@ -14,18 +14,18 @@ import Lexer
 
 
 %token
-  input {TokenInput}
-  out {TokenOut}
-  where {TokenWhere}
-  nothing {TokenNothing}
+  input    {TokenInput}
+  out      {TokenOut}
+  where    {TokenWhere}
+  nothing  {TokenNothing}
   filename {TokenFilename $$}
-  key {TokenKey $$}
-  '?' {TokenQMark}
-  ':' {TokenHasColumns}
-  ';' {TokenTerminator}
-  ',' {TokenKeySep}
-  "==" {TokenEq}                   --idk how to match multiple symbols
-  "!=" {TokenNEq}
+  key      {TokenKey $$}
+  '?'      {TokenQMark}
+  ':'      {TokenHasColumns}
+  ';'      {TokenTerminator}
+  ','      {TokenKeySep}
+  "=="     {TokenEq}
+  "!="     {TokenNEq}
 
 
 
@@ -37,6 +37,7 @@ import Lexer
 %left '?'
 %left "==" "!="
 %left ':' ','
+%left '(' ')'
 
 
 
@@ -51,29 +52,29 @@ import Lexer
 Prog : input InputExp WhereExp out OutExp    {$2 $3 $5}
      | input InputExp out OutExp             {$2 $4}
 
-InputExp : CSV_File ';' InputExp             {Input $1 $3}
-         | CSV_File ';'                      {Input $1}
+InputExp : CSV_File ';' InputExp             {InputNT $1 $3}
+         | CSV_File ';'                      {InputT $1}
 
-OutExp : OutExp ',' OutExp                   {Output $1 $3}
-       | InlineIf                            {Output $1}
-       | key                                 {Output $1}
+OutExp : OutExp ',' OutExp                   {OutputNT $1 $3}
+       | InlineIf                            {OutputTIf $1}
+       | key                                 {OutputTKey $1}
 
-CSV_File : filename ':' Keys                 {CsvFile $1 $3}
+CSV_File : filename ':' Keys                 {File $1 $3}
 
-Keys : key ',' Keys                          {Keys $1 $3}
-     | key                                   {Key $1}
+Keys : key ',' Keys                          {KeysNT $1 $3}
+     | key                                   {KeysT $1}
 
-WhereExp : where Condition                   {Where $1}
+WhereExp : where Condition                   {$2}
 
-InlineIf : Condition '?' key ':' key         {InlineIf $1 $3 $5}
+InlineIf : Condition '?' key ':' key         {If $1 $3 $5}
 
-Condition : Operand ConditionOp Operand      {Condition $1 $2 $3}
+Condition : Operand ConditionOp Operand      {Condtn $1 $2 $3}
 
-ConditionOp : "=="                           {ConditionOp Eq}
-            | "!="                           {ConditionOp NEq}
+ConditionOp : "=="                           {Eq}
+            | "!="                           {NEq}
 
-Operand : key                                {Operand $1}
-        | nothing                            {Operand Nothing}
+Operand : key                                {OperandKey $1}
+        | nothing                            {OperandNothing Null}
 
 
 
@@ -84,21 +85,22 @@ parseError :: [Token] -> a
 parseError _ = error "Parse Error"
 
 
-data Prog = ProgNoWhere Input Output | ProgWhere Input Where Output
+data Prog = ProgNW Input Output | ProgW Input Where Output
 
-data Input = CsvFile Input | CsvFile
-data Output = Output Output | InlineIf | Key
+data Input = InputNT CsvFile Input | InputT CsvFile
+data Output = OutputNT Output Output | OutputTIf InlineIf | OutputTKey Key
 
-data CsvFile = Filename Keys
+data CsvFile = File Filename Keys
 type Filename = String
 
-data Keys = Key Keys | Key
+data Keys = KeysNT Key Keys | KeysT Key
 type Key = String
 
-data Where = Condition
-data InlineIf = Condition Key Key
-data Condition = Operand ConditionOp Operand
-data Operand = Key | Nothing
+type Where = Condition
+data InlineIf = If Condition Key Key
+data Condition = Condtn Operand ConditionOp Operand
+data Operand = OperandKey Key | OperandNothing Nothing
 data ConditionOp = Eq | NEq
 
-type Nothing = ""
+data Nothing = Null
+}

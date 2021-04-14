@@ -24,7 +24,7 @@ tokens :-
   OUT               	 { \s -> TokenOut }
   WHERE             	 { \s -> TokenWhere }
   NOTHING           	 { \s -> TokenNothing }
-  $alNum*\.csv           { \s -> TokenFilename s }
+  $alNum*\.csv         { \s -> TokenFilename s }
   [a-z]$alNum*      	 { \s -> TokenKey s }
   \?                	 { \s -> TokenQMark }
   \:                	 { \s -> TokenHasColumns }
@@ -51,4 +51,5 @@ data Token =
   TokenKeySep          |
   TokenEq              |
   TokenNEq             
-  deriving (Eq,Show) 
+  deriving (Eq,Show)
+}
