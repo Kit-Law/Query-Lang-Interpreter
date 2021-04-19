@@ -1,11 +1,9 @@
-module Evaluator where
+module Evaluator ( eval ) where
+
 import Grammar
 
-import System.IO  
-import Control.Monad
-import Data.Char  
+import System.IO
 import Data.List.Split
-import Data.List
 
 type Table = (Keys, [[ String ]])
 data EvaledCon = EC Int ConditionOp Int
@@ -19,20 +17,14 @@ Maintainer  : Christopher Lawrence
               cl5g19@soton.ac.uk
 Portability : WOCA
 -}
-eval :: Prog -> IO Table
+eval :: Prog -> IO [[ String ]]
 eval (ProgNW input output) = do evaledInput <- evalInput input 
-                                return evaledInput
-eval (ProgW input whereArg output) = do evaledInput <- evalInput input 
-                                        let filteredContent = evalWhere whereArg evaledInput
-                                        return filteredContent
-{-eval :: Prog -> IO [[ String ]]
-eval (ProgNW input output) = do evaledInput <- evalInput input 
-                                let evaledOutput = evalOut evaledInput
+                                let evaledOutput = evalOut evaledInput output
                                 return evaledOutput
 eval (ProgW input whereCon output) = do evaledInput <- evalInput input 
-                                        let filteredContent = evalWhere evaledInput
-                                        let evaledOutput = evalOut filteredContent
-                                        return evaledOutput-}
+                                        let filteredContent = evalWhere whereCon evaledInput
+                                        let evaledOutput = evalOut filteredContent output
+                                        return evaledOutput
 
 {-|
 Function    : evalInput
@@ -64,9 +56,9 @@ Portability : WOCA
 -}
 evalFile :: CsvFile -> IO Table
 evalFile (File filename keys) = do file <- readFile filename
-                               let ls = lines file
-                               let contents = map (splitOn ",") ls
-                               return (keys, contents)
+                                   let ls = lines file
+                                   let contents = map (splitOn ",") ls
+                                   return (keys, contents)
 
 {-|
 Function    : evalWhere
@@ -83,9 +75,28 @@ evalWhere (TmWhere condition) (keys, contents) = (keys, (filterByCon (evalCondit
           filterByCon (EC lhs Eq rhs) contents = [row | row <- contents, row !! lhs == row !! rhs]
           filterByCon (EC lhs NEq rhs) contents = [row | row <- contents, row !! lhs /= row !! rhs]
 
+{-|
+Function    : evalCondition
+Description : find the correct indexes for the keys
+Copyright   : (c) University of Southampton 2020
+Maintainer  : Christopher Lawrence
+              Student ID: 31018742
+              cl5g19@soton.ac.uk
+Portability : WOCA
+-}
 evalCondition :: Condition -> Keys -> EvaledCon
-evalCondition (Condtn (OperandKey lhs) op (OperandKey rhs)) keys = EC (evalKey lhs keys) op (evalKey rhs keys)
+evalCondition (Condtn (OperandKey lhs) op (OperandKey rhs)) keys = 
+    EC (evalKey lhs keys) op (evalKey rhs keys)
 
+{-|
+Function    : evalKey
+Description : get the index of the key from the main table
+Copyright   : (c) University of Southampton 2020
+Maintainer  : Christopher Lawrence
+              Student ID: 31018742
+              cl5g19@soton.ac.uk
+Portability : WOCA
+-}
 evalKey :: Key -> Keys -> Int
 evalKey key keys = evalKeyIndex key keys 0
     where evalKeyIndex :: Key -> Keys -> Int -> Int
@@ -98,12 +109,58 @@ evalKey key keys = evalKeyIndex key keys 0
 
 {-|
 Function    : evalOut 
-Description : output to the output file
+Description : create the final output list
 Copyright   : (c) University of Southampton 2020
 Maintainer  : Christopher Lawrence
               Student ID: 31018742
               cl5g19@soton.ac.uk
 Portability : WOCA
 -}
---evalOut :: Table -> Output -> [[String]]
---evalOut (keys, contents)@table (o1, o2) = evalOut table --TODO: fix this lol
+evalOut :: Table -> Output -> [[ String ]]
+evalOut (tableKeys, contents) output = map (evalOutRow output tableKeys) contents
+    where {-|
+          Function    : evalOutRow 
+          Description : evaluate a row form the table
+          Copyright   : (c) University of Southampton 2020
+          Maintainer  : Christopher Lawrence
+                        Student ID: 31018742
+                        cl5g19@soton.ac.uk
+          Portability : WOCA
+          -}
+          evalOutRow :: Output -> Keys -> [ String ] -> [ String ]
+          evalOutRow (OutputT arg) tableKeys row = 
+              evalOutArg arg tableKeys row : []
+          evalOutRow (OutputNT arg rest) tableKeys row = 
+              evalOutArg arg tableKeys row : evalOutRow rest tableKeys row
+
+          {-|
+          Function    : evalOutArg 
+          Description : evaluate one of the output arguments
+          Copyright   : (c) University of Southampton 2020
+          Maintainer  : Christopher Lawrence
+                        Student ID: 31018742
+                        cl5g19@soton.ac.uk
+          Portability : WOCA
+          -}
+          evalOutArg :: OutKey -> Keys -> [ String ] -> String
+          evalOutArg (OutKeyIf (If condition true false)) tableKeys row = 
+              evalInlineIf (evalCondition condition tableKeys) true false row
+          evalOutArg (OutKeyKey key) tableKeys row = 
+              row !! evalKey key tableKeys
+
+          {-|
+          Function    : evalInlineIf 
+          Description : if the condition holds then output the first key otherwise the second
+          Copyright   : (c) University of Southampton 2020
+          Maintainer  : Christopher Lawrence
+                        Student ID: 31018742
+                        cl5g19@soton.ac.uk
+          Portability : WOCA
+          -}
+          evalInlineIf :: EvaledCon -> Key -> Key -> [ String ] -> String
+          evalInlineIf (EC lhs Eq rhs) true false row
+              | row !! lhs == row !! rhs = true
+              | otherwise = false
+          evalInlineIf (EC lhs NEq rhs) true false row
+              | row !! lhs /= row !! rhs = true
+              | otherwise = false
