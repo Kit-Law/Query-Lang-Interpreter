@@ -81,7 +81,7 @@ ConditionOp : "=="                           {Eq}
             | "!="                           {NEq}
 
 Operand : string                             {OperandKey $1}
-        | nothing                            {OperandNothing Null}
+        | nothing                            {OperandNothing}
         | '"' string '"'                     {OperandConst $2}
 
 
@@ -124,12 +124,9 @@ data InlineIf = If Condition Key Key
 data Condition = Condtn Operand ConditionOp Operand
     deriving (Show, Eq)
 
-data Operand = OperandKey Key | OperandNothing Nothing | OperandConst String
+data Operand = OperandKey Key | OperandNothing | OperandConst String
     deriving (Show, Eq)
 
 data ConditionOp = Eq | NEq
-    deriving (Show, Eq)
-
-data Nothing = Null
     deriving (Show, Eq)
 }
