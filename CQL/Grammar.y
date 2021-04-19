@@ -55,9 +55,11 @@ Prog : input InputExp WhereExp out OutExp    {ProgW $2 $3 $5}
 InputExp : CSV_File ';' InputExp             {InputNT $1 $3}
          | CSV_File ';'                      {InputT $1}
 
-OutExp : OutExp ',' OutExp                   {OutputNT $1 $3}
-       | InlineIf                            {OutputTIf $1}
-       | key                                 {OutputTKey $1}
+OutExp : OutKey ',' OutExp                   {OutputNT $1 $3}
+       | OutKey                              {OutputT $1}
+
+OutKey : InlineIf                            {OutKeyIf $1}
+       | key                                 {OutKeyKey $1}       
 
 CSV_File : filename ':' Keys                 {File $1 $3}
 
@@ -91,7 +93,10 @@ data Prog = ProgNW Input Output | ProgW Input Where Output
 data Input = InputNT CsvFile Input | InputT CsvFile
     deriving (Show, Eq)
 
-data Output = OutputNT Output Output | OutputTIf InlineIf | OutputTKey Key
+data Output = OutputNT OutKey Output | OutputT OutKey
+    deriving (Show, Eq)
+
+data OutKey = OutKeyIf InlineIf | OutKeyKey Key
     deriving (Show, Eq)
 
 data CsvFile = File Filename Keys
