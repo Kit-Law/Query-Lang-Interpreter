@@ -144,7 +144,7 @@ evalOut (tableKeys, contents) output = map (evalOutRow output tableKeys) content
           -}
           evalOutArg :: OutKey -> Keys -> [ String ] -> String
           evalOutArg (OutKeyIf (If condition true false)) tableKeys row = 
-              evalInlineIf (evalCondition condition tableKeys) true false row
+              row !! evalKey (evalInlineIf (evalCondition condition tableKeys) true false row) tableKeys
           evalOutArg (OutKeyKey key) tableKeys row = 
               row !! evalKey key tableKeys
 
@@ -157,7 +157,7 @@ evalOut (tableKeys, contents) output = map (evalOutRow output tableKeys) content
                         cl5g19@soton.ac.uk
           Portability : WOCA
           -}
-          evalInlineIf :: EvaledCon -> Key -> Key -> [ String ] -> String
+          evalInlineIf :: EvaledCon -> Key -> Key -> [ String ] -> Key
           evalInlineIf (EC lhs Eq rhs) true false row
               | row !! lhs == row !! rhs = true
               | otherwise = false
