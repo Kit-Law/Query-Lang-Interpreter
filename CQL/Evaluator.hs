@@ -6,7 +6,8 @@ import System.IO
 import Data.List.Split
 
 type Table = (Keys, [[ String ]])
-data EvaledCon = EC Int ConditionOp Int
+data EvaledCon = EC Oprd ConditionOp Oprd
+data Oprd = OI Int | OK String
 
 {-|
 Function    : eval
@@ -72,8 +73,15 @@ Portability : WOCA
 evalWhere :: Where -> Table -> Table
 evalWhere (TmWhere condition) (keys, contents) = (keys, (filterByCon (evalCondition condition keys) contents))
     where filterByCon :: EvaledCon -> [[ String ]] -> [[ String ]]
-          filterByCon (EC lhs Eq rhs) contents = [row | row <- contents, row !! lhs == row !! rhs]
-          filterByCon (EC lhs NEq rhs) contents = [row | row <- contents, row !! lhs /= row !! rhs]
+          filterByCon condition contents = [row | row <- contents, fuck condition row]
+
+fuck :: EvaledCon -> [ String ] -> Bool
+fuck (EC lhs Eq rhs) row = cunt lhs row == cunt rhs row
+fuck (EC lhs NEq rhs) row = cunt lhs row /= cunt rhs row
+
+cunt :: Oprd -> [ String ] -> String
+cunt (OI i) row = row !! i
+cunt (OK str) _ = str
 
 {-|
 Function    : evalCondition
@@ -85,8 +93,12 @@ Maintainer  : Christopher Lawrence
 Portability : WOCA
 -}
 evalCondition :: Condition -> Keys -> EvaledCon
-evalCondition (Condtn (OperandKey lhs) op (OperandKey rhs)) keys = 
-    EC (evalKey lhs keys) op (evalKey rhs keys)
+evalCondition (Condtn lhs op rhs) keys = 
+    EC (evalOperand lhs keys) op (evalOperand rhs keys)
+    where evalOperand :: Operand -> Keys -> Oprd
+          evalOperand (OperandKey operand) keys = OI (evalKey operand keys)
+          evalOperand (OperandConst string) _ = OK string
+          evalOperand (OperandNothing) _ = OK ""
 
 {-|
 Function    : evalKey
@@ -148,6 +160,7 @@ evalOut (tableKeys, contents) output = map (evalOutRow output tableKeys) content
           evalOutArg (OutArgKey key) tableKeys row = 
               row !! evalKey key tableKeys
           evalOutArg (OutArgConst str) _ _ = str
+          evalOutArg (OutArgNothing) _ _ = ""
 
           {-|
           Function    : evalInlineIf 
@@ -159,9 +172,9 @@ evalOut (tableKeys, contents) output = map (evalOutRow output tableKeys) content
           Portability : WOCA
           -}
           evalInlineIf :: EvaledCon -> Key -> Key -> [ String ] -> Key
-          evalInlineIf (EC lhs Eq rhs) true false row
-              | row !! lhs == row !! rhs = true
+          evalInlineIf condition true false row
+              | fuck condition row = true
               | otherwise = false
-          evalInlineIf (EC lhs NEq rhs) true false row
-              | row !! lhs /= row !! rhs = true
+          evalInlineIf condition true false row
+              | fuck condition row = true
               | otherwise = false
