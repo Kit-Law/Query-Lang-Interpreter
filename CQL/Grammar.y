@@ -84,7 +84,7 @@ Operand : key                                {OperandKey $1}
 
 {
 parseError :: [Token] -> a
-parseError _ = error "Parse Error"
+parseError ts = error ("Parse Error, unparsed tokens: " ++ (show ts))
 
 
 data Prog = ProgNW Input Output | ProgW Input Where Output
