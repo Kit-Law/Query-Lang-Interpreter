@@ -19,13 +19,15 @@ import Lexer
   where    {TokenWhere}
   nothing  {TokenNothing}
   filename {TokenFilename $$}
-  key      {TokenKey $$}
+  string   {TokenString $$}
   '?'      {TokenQMark}
   ':'      {TokenHasColumns}
   ';'      {TokenTerminator}
   ','      {TokenKeySep}
   "=="     {TokenEq}
   "!="     {TokenNEq}
+  '"'      {TokenSMark}
+
 
 
 
@@ -33,10 +35,11 @@ import Lexer
 
 %nonassoc input out where
 %left ';'
-%left nothing filename key
+%left nothing filename string
 %left '?'
 %left "==" "!="
 %left ':' ','
+%left '"'
 %left '(' ')'
 
 
@@ -55,28 +58,31 @@ Prog : input InputExp WhereExp out OutExp    {ProgW $2 $3 $5}
 InputExp : CSV_File ';' InputExp             {InputNT $1 $3}
          | CSV_File ';'                      {InputT $1}
 
-OutExp : OutKey ',' OutExp                   {OutputNT $1 $3}
-       | OutKey                              {OutputT $1}
+OutExp : OutArg ',' OutExp                   {OutputNT $1 $3}
+       | OutArg                              {OutputT $1}
 
-OutKey : InlineIf                            {OutKeyIf $1}
-       | key                                 {OutKeyKey $1}       
+OutArg : InlineIf                            {OutArgIf $1}
+       | string                              {OutArgKey $1}
+       | '"' string '"'                      {OutArgConst $2}
+       | nothing                             {OutArgNothing}
 
 CSV_File : filename ':' Keys                 {File $1 $3}
 
-Keys : key ',' Keys                          {KeysNT $1 $3}
-     | key                                   {KeysT $1}
+Keys : string ',' Keys                       {KeysNT $1 $3}
+     | string                                {KeysT $1}
 
 WhereExp : where Condition                   {TmWhere $2}
 
-InlineIf : Condition '?' key ':' key         {If $1 $3 $5}
+InlineIf : Condition '?' string ':' string   {If $1 $3 $5}
 
 Condition : Operand ConditionOp Operand      {Condtn $1 $2 $3}
 
 ConditionOp : "=="                           {Eq}
             | "!="                           {NEq}
 
-Operand : key                                {OperandKey $1}
+Operand : string                             {OperandKey $1}
         | nothing                            {OperandNothing Null}
+        | '"' string '"'                     {OperandConst $2}
 
 
 
@@ -93,10 +99,10 @@ data Prog = ProgNW Input Output | ProgW Input Where Output
 data Input = InputNT CsvFile Input | InputT CsvFile
     deriving (Show, Eq)
 
-data Output = OutputNT OutKey Output | OutputT OutKey
+data Output = OutputNT OutArg Output | OutputT OutArg
     deriving (Show, Eq)
 
-data OutKey = OutKeyIf InlineIf | OutKeyKey Key
+data OutArg = OutArgIf InlineIf | OutArgKey Key | OutArgConst String | OutArgNothing
     deriving (Show, Eq)
 
 data CsvFile = File Filename Keys
@@ -118,7 +124,7 @@ data InlineIf = If Condition Key Key
 data Condition = Condtn Operand ConditionOp Operand
     deriving (Show, Eq)
 
-data Operand = OperandKey Key | OperandNothing Nothing
+data Operand = OperandKey Key | OperandNothing Nothing | OperandConst String
     deriving (Show, Eq)
 
 data ConditionOp = Eq | NEq
