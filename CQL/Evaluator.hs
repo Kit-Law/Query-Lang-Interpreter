@@ -6,8 +6,6 @@ import System.IO
 import Data.List.Split
 
 type Table = (Keys, [[ String ]])
-data EvaledCon = EC Oprd ConditionOp Oprd
-data Oprd = OI Int | OK String
 
 {-|
 Function    : eval
@@ -71,34 +69,36 @@ Maintainer  : Christopher Lawrence
 Portability : WOCA
 -}
 evalWhere :: Where -> Table -> Table
-evalWhere (TmWhere condition) (keys, contents) = (keys, (filterByCon (evalCondition condition keys) contents))
-    where filterByCon :: EvaledCon -> [[ String ]] -> [[ String ]]
-          filterByCon condition contents = [row | row <- contents, fuck condition row]
-
-fuck :: EvaledCon -> [ String ] -> Bool
-fuck (EC lhs Eq rhs) row = cunt lhs row == cunt rhs row
-fuck (EC lhs NEq rhs) row = cunt lhs row /= cunt rhs row
-
-cunt :: Oprd -> [ String ] -> String
-cunt (OI i) row = row !! i
-cunt (OK str) _ = str
+evalWhere (TmWhere condition) (keys, contents) = (keys, (filterByCon condition keys contents))
+    where filterByCon :: Condition -> Keys -> [[ String ]] -> [[ String ]]
+          filterByCon condition keys contents = [row | row <- contents, evalCondition condition keys row]
 
 {-|
 Function    : evalCondition
-Description : find the correct indexes for the keys
+Description : evaluates the condition into a boolean
 Copyright   : (c) University of Southampton 2020
 Maintainer  : Christopher Lawrence
               Student ID: 31018742
               cl5g19@soton.ac.uk
 Portability : WOCA
 -}
-evalCondition :: Condition -> Keys -> EvaledCon
-evalCondition (Condtn lhs op rhs) keys = 
-    EC (evalOperand lhs keys) op (evalOperand rhs keys)
-    where evalOperand :: Operand -> Keys -> Oprd
-          evalOperand (OperandKey operand) keys = OI (evalKey operand keys)
-          evalOperand (OperandConst string) _ = OK string
-          evalOperand (OperandNothing) _ = OK ""
+evalCondition :: Condition -> Keys -> [ String ] -> Bool
+evalCondition (Condtn lhs Eq rhs) keys row = evalOperand lhs keys row == evalOperand rhs keys row
+evalCondition (Condtn lhs NEq rhs) keys row = evalOperand lhs keys row /= evalOperand rhs keys row
+
+{-|
+Function    : evalOperand
+Description : gets the value of the operand
+Copyright   : (c) University of Southampton 2020
+Maintainer  : Christopher Lawrence
+              Student ID: 31018742
+              cl5g19@soton.ac.uk
+Portability : WOCA
+-}
+evalOperand :: Operand -> Keys -> [ String ] -> String
+evalOperand (OperandKey key) keys row = row !! (evalKey key keys)
+evalOperand (OperandConst string) _ _ = string
+evalOperand (OperandNothing) _ _ = ""
 
 {-|
 Function    : evalKey
@@ -156,7 +156,7 @@ evalOut (tableKeys, contents) output = map (evalOutRow output tableKeys) content
           -}
           evalOutArg :: OutArg -> Keys -> [ String ] -> String
           evalOutArg (OutArgIf (If condition true false)) tableKeys row = 
-              row !! evalKey (evalInlineIf (evalCondition condition tableKeys) true false row) tableKeys
+              row !! evalKey (evalInlineIf condition tableKeys true false row) tableKeys
           evalOutArg (OutArgKey key) tableKeys row = 
               row !! evalKey key tableKeys
           evalOutArg (OutArgConst str) _ _ = str
@@ -171,10 +171,7 @@ evalOut (tableKeys, contents) output = map (evalOutRow output tableKeys) content
                         cl5g19@soton.ac.uk
           Portability : WOCA
           -}
-          evalInlineIf :: EvaledCon -> Key -> Key -> [ String ] -> Key
-          evalInlineIf condition true false row
-              | fuck condition row = true
-              | otherwise = false
-          evalInlineIf condition true false row
-              | fuck condition row = true
+          evalInlineIf :: Condition -> Keys -> Key -> Key -> [ String ] -> Key
+          evalInlineIf condition keys true false row
+              | evalCondition condition keys row = true
               | otherwise = false
