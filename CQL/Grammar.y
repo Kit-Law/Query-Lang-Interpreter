@@ -26,6 +26,10 @@ import Lexer
   ','      {TokenKeySep}
   "=="     {TokenEq}
   "!="     {TokenNEq}
+  '>'      {TokenGT}
+  ">="     {TokenGEq}
+  '<'      {TokenLT}
+  "<="     {TokenLEq}
   '"'      {TokenSMark}
 
 
@@ -37,7 +41,7 @@ import Lexer
 %left ';'
 %left nothing filename string
 %left '?'
-%left "==" "!="
+%left "==" "!=" '>' '<'
 %left ':' ','
 %left '"'
 %left '(' ')'
@@ -79,9 +83,13 @@ Condition : Operand ConditionOp Operand      {Condtn $1 $2 $3}
 
 ConditionOp : "=="                           {Eq}
             | "!="                           {NEq}
+            | '>'                            {Gt}
+            | ">="                           {GEq}
+            | '<'                            {Lt}
+            | "<="                           {LEq}
 
 Operand : string                             {OperandKey $1}
-        | nothing                            {OperandNothing}
+        | nothing                            {OperandNothing Null}
         | '"' string '"'                     {OperandConst $2}
 
 
@@ -124,9 +132,12 @@ data InlineIf = If Condition Key Key
 data Condition = Condtn Operand ConditionOp Operand
     deriving (Show, Eq)
 
-data Operand = OperandKey Key | OperandNothing | OperandConst String
+data Operand = OperandKey Key | OperandNothing Nothing | OperandConst String
     deriving (Show, Eq)
 
-data ConditionOp = Eq | NEq
+data ConditionOp = Eq | NEq | Gt | GEq | Lt | LEq
+    deriving (Show, Eq)
+
+data Nothing = Null
     deriving (Show, Eq)
 }

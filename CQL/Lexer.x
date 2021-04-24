@@ -31,8 +31,12 @@ tokens :-
   \,                	 { \s -> TokenKeySep }
   "=="              	 { \s -> TokenEq }
   "!="              	 { \s -> TokenNEq }
+  \>                   { \s -> TokenGT }
+  ">="                 { \s -> TokenGEq }
+  "<="                 { \s -> TokenLEq }
+  \<                   { \s -> TokenLT }
   \"                   { \s -> TokenSMark }
-  $alNum+             { \s -> TokenString s }
+  $alNum+              { \s -> TokenString s }
 
 
 
@@ -52,6 +56,10 @@ data Token =
   TokenKeySep          |
   TokenEq              |
   TokenNEq             |
-  TokenSMark
+  TokenSMark           |
+  TokenGT              |
+  TokenGEq             |
+  TokenLT              |
+  TokenLEq
   deriving (Eq,Show)
 }
