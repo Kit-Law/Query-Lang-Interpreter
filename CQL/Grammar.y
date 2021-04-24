@@ -30,6 +30,8 @@ import Lexer
   ">="     {TokenGEq}
   '<'      {TokenLT}
   "<="     {TokenLEq}
+  "&&"     {TokenAnd}
+  "||"     {TokenOr}
   '"'      {TokenSMark}
 
 
@@ -41,6 +43,7 @@ import Lexer
 %left ';'
 %left nothing filename string
 %left '?'
+%left "&&" "||"
 %left "==" "!=" '>' '<'
 %left ':' ','
 %left '"'
@@ -75,9 +78,13 @@ CSV_File : filename ':' Keys                 {File $1 $3}
 Keys : string ',' Keys                       {KeysNT $1 $3}
      | string                                {KeysT $1}
 
-WhereExp : where Condition                   {TmWhere $2}
+WhereExp : where Conditions                  {TmWhere $2}
 
-InlineIf : Condition '?' string ':' string   {If $1 $3 $5}
+InlineIf : Conditions '?' string ':' string   {If $1 $3 $5}
+
+Conditions : Condition                       {ConditionsT $1}
+           | Condition "&&" Conditions       {ConditionsAnd $1 $3}
+           | Condition "||" Conditions       {ConditionsOr $1 $3}
 
 Condition : Operand ConditionOp Operand      {Condtn $1 $2 $3}
 
@@ -123,10 +130,13 @@ data Keys = KeysNT Key Keys | KeysT Key
 
 type Key = String
     
-data Where = TmWhere Condition
+data Where = TmWhere Conditions
     deriving (Show, Eq)
 
-data InlineIf = If Condition Key Key
+data InlineIf = If Conditions Key Key
+    deriving (Show, Eq)
+
+data Conditions = ConditionsT Condition | ConditionsAnd Condition Conditions | ConditionsOr Condition Conditions
     deriving (Show, Eq)
 
 data Condition = Condtn Operand ConditionOp Operand

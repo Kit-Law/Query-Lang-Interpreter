@@ -35,6 +35,8 @@ tokens :-
   ">="                 { \s -> TokenGEq }
   "<="                 { \s -> TokenLEq }
   \<                   { \s -> TokenLT }
+  "&&"                 { \s -> TokenAnd }
+  "||"                 { \s -> TokenOr }
   \"                   { \s -> TokenSMark }
   $alNum+              { \s -> TokenString s }
 
@@ -60,6 +62,8 @@ data Token =
   TokenGT              |
   TokenGEq             |
   TokenLT              |
-  TokenLEq
+  TokenLEq             |
+  TokenAnd             |
+  TokenOr
   deriving (Eq,Show)
 }
