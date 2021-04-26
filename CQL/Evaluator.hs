@@ -70,8 +70,22 @@ Portability : WOCA
 -}
 evalWhere :: Where -> Table -> Table
 evalWhere (TmWhere condition) (keys, contents) = (keys, (filterByCon condition keys contents))
-    where filterByCon :: Condition -> Keys -> [[ String ]] -> [[ String ]]
-          filterByCon condition keys contents = [row | row <- contents, evalCondition condition keys row]
+    where filterByCon :: Conditions -> Keys -> [[ String ]] -> [[ String ]]
+          filterByCon condition keys contents = [row | row <- contents, evalConditions condition keys row]
+
+{-|
+Function    : evalConditions
+Description : evaluates the lhs and rhs of an and or an or operation
+Copyright   : (c) University of Southampton 2020
+Maintainer  : Christopher Lawrence
+              Student ID: 31018742
+              cl5g19@soton.ac.uk
+Portability : WOCA
+-}
+evalConditions :: Conditions -> Keys -> [ String ] -> Bool
+evalConditions (ConditionsT con) keys row = evalCondition con keys row
+evalConditions (ConditionsAnd lhs rhs) keys row = evalConditions lhs keys row && evalConditions rhs keys row
+evalConditions (ConditionsOr lhs rhs) keys row = evalConditions lhs keys row || evalConditions rhs keys row 
 
 {-|
 Function    : evalCondition
@@ -85,6 +99,10 @@ Portability : WOCA
 evalCondition :: Condition -> Keys -> [ String ] -> Bool
 evalCondition (Condtn lhs Eq rhs) keys row = evalOperand lhs keys row == evalOperand rhs keys row
 evalCondition (Condtn lhs NEq rhs) keys row = evalOperand lhs keys row /= evalOperand rhs keys row
+evalCondition (Condtn lhs Gt rhs) keys row = evalOperand lhs keys row > evalOperand rhs keys row
+evalCondition (Condtn lhs GEq rhs) keys row = evalOperand lhs keys row >= evalOperand rhs keys row
+evalCondition (Condtn lhs Lt rhs) keys row = evalOperand lhs keys row < evalOperand rhs keys row
+evalCondition (Condtn lhs LEq rhs) keys row = evalOperand lhs keys row <= evalOperand rhs keys row
 
 {-|
 Function    : evalOperand
@@ -155,8 +173,8 @@ evalOut (tableKeys, contents) output = map (evalOutRow output tableKeys) content
           Portability : WOCA
           -}
           evalOutArg :: OutArg -> Keys -> [ String ] -> String
-          evalOutArg (OutArgIf (If condition true false)) tableKeys row = 
-              row !! evalKey (evalInlineIf condition tableKeys true false row) tableKeys
+          evalOutArg (OutArgIf (If conditions true false)) tableKeys row = 
+              row !! evalKey (evalInlineIf conditions tableKeys true false row) tableKeys
           evalOutArg (OutArgKey key) tableKeys row = 
               row !! evalKey key tableKeys
           evalOutArg (OutArgConst str) _ _ = str
@@ -171,7 +189,7 @@ evalOut (tableKeys, contents) output = map (evalOutRow output tableKeys) content
                         cl5g19@soton.ac.uk
           Portability : WOCA
           -}
-          evalInlineIf :: Condition -> Keys -> Key -> Key -> [ String ] -> Key
-          evalInlineIf condition keys true false row
-              | evalCondition condition keys row = true
+          evalInlineIf :: Conditions -> Keys -> Key -> Key -> [ String ] -> Key
+          evalInlineIf conditions keys true false row
+              | evalConditions conditions keys row = true
               | otherwise = false

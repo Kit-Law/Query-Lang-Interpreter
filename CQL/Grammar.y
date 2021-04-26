@@ -43,7 +43,8 @@ import Lexer
 %left ';'
 %left nothing filename string
 %left '?'
-%left "&&" "||"
+%left "||"
+%left "&&"
 %left "==" "!=" '>' '<'
 %left ':' ','
 %left '"'
@@ -83,8 +84,8 @@ WhereExp : where Conditions                  {TmWhere $2}
 InlineIf : Conditions '?' string ':' string   {If $1 $3 $5}
 
 Conditions : Condition                       {ConditionsT $1}
-           | Condition "&&" Conditions       {ConditionsAnd $1 $3}
-           | Condition "||" Conditions       {ConditionsOr $1 $3}
+           | Conditions "&&" Conditions       {ConditionsAnd $1 $3}
+           | Conditions "||" Conditions       {ConditionsOr $1 $3}
 
 Condition : Operand ConditionOp Operand      {Condtn $1 $2 $3}
 
@@ -96,7 +97,7 @@ ConditionOp : "=="                           {Eq}
             | "<="                           {LEq}
 
 Operand : string                             {OperandKey $1}
-        | nothing                            {OperandNothing Null}
+        | nothing                            {OperandNothing}
         | '"' string '"'                     {OperandConst $2}
 
 
@@ -136,18 +137,15 @@ data Where = TmWhere Conditions
 data InlineIf = If Conditions Key Key
     deriving (Show, Eq)
 
-data Conditions = ConditionsT Condition | ConditionsAnd Condition Conditions | ConditionsOr Condition Conditions
+data Conditions = ConditionsT Condition | ConditionsAnd Conditions Conditions | ConditionsOr Conditions Conditions
     deriving (Show, Eq)
 
 data Condition = Condtn Operand ConditionOp Operand
     deriving (Show, Eq)
 
-data Operand = OperandKey Key | OperandNothing Nothing | OperandConst String
+data Operand = OperandKey Key | OperandNothing | OperandConst String
     deriving (Show, Eq)
 
 data ConditionOp = Eq | NEq | Gt | GEq | Lt | LEq
-    deriving (Show, Eq)
-
-data Nothing = Null
     deriving (Show, Eq)
 }

@@ -27,7 +27,7 @@ Maintainer  : Christopher Lawrence
 Portability : WOCA
 -}
 formatCSV :: [[ String ]] -> IO ()
-formatCSV (line:[]) = do putStrLn $ formatRow line
+formatCSV [] = return ()
 formatCSV (line:lines) = do putStrLn $ formatRow line
                             formatCSV lines
 
