@@ -38,6 +38,8 @@ tokens :-
   "&&"                 { \s -> TokenAnd }
   "||"                 { \s -> TokenOr }
   \"                   { \s -> TokenSMark }
+  \(                   { \s -> TokenLParen }
+  \)                   { \s -> TokenRParen }
   $alNum+              { \s -> TokenString s }
 
 
@@ -64,6 +66,8 @@ data Token =
   TokenLT              |
   TokenLEq             |
   TokenAnd             |
-  TokenOr
+  TokenOr              |
+  TokenLParen          |
+  TokenRParen
   deriving (Eq,Show)
 }
