@@ -4,7 +4,7 @@ This is a domain specific programming language for querying CSV documents, calle
 
 ## Compilation
 
-Use stack or cabal to compile:
+Use stack or cabal to compile, in the stack dir:
 
 ```cmd
 stack build --copy-bins --local-bin-path .
