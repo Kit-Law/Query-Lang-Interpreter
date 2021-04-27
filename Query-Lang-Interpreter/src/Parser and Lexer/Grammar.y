@@ -33,6 +33,8 @@ import Lexer
   "&&"     {TokenAnd}
   "||"     {TokenOr}
   '"'      {TokenSMark}
+  '('      {TokenLParen}
+  ')'      {TokenRParen}
 
 
 
@@ -81,11 +83,12 @@ Keys : string ',' Keys                       {KeysNT $1 $3}
 
 WhereExp : where Conditions                  {TmWhere $2}
 
-InlineIf : Conditions '?' string ':' string   {If $1 $3 $5}
+InlineIf : Conditions '?' string ':' string  {If $1 $3 $5}
 
 Conditions : Condition                       {ConditionsT $1}
-           | Conditions "&&" Conditions       {ConditionsAnd $1 $3}
-           | Conditions "||" Conditions       {ConditionsOr $1 $3}
+           | Conditions "&&" Conditions      {ConditionsAnd $1 $3}
+           | Conditions "||" Conditions      {ConditionsOr $1 $3}
+           | '(' Conditions ')'              {$2}
 
 Condition : Operand ConditionOp Operand      {Condtn $1 $2 $3}
 
