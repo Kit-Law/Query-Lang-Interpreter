@@ -35,14 +35,39 @@ Maintainer  : Christopher Lawrence
 Portability : WOCA
 -}
 evalInput :: Input -> IO Table
-evalInput (InputT csvFile) = evalFile csvFile
+evalInput (InputT csvFile) = do table <- evalFile csvFile
+                                checkKeys table csvFile
+                                return table 
 evalInput (InputNT csvFile rest) = do lhs <- evalFile csvFile
+                                      checkKeys lhs csvFile
                                       rhs <- evalInput rest
                                       let keys = appendKeys (fst lhs) (fst rhs)
                                       return (keys, [lhsRow ++ rhsRow | lhsRow <- snd lhs, rhsRow <- snd rhs])
     where appendKeys :: Keys -> Keys -> Keys
           appendKeys (KeysNT key rest) remaining = KeysNT key (appendKeys rest remaining)
           appendKeys (KeysT key) remaining = KeysNT key remaining
+
+{-|
+Function    : checkKeys
+Description : This function checks that the number of keys is the same as the row size
+Copyright   : (c) University of Southampton 2020
+Maintainer  : Christopher Lawrence
+              Student ID: 31018742
+              cl5g19@soton.ac.uk
+Portability : WOCA
+-}
+checkKeys :: Table -> CsvFile -> IO ()
+checkKeys (keys, (row:_)) (File filename _)
+  | keylen > rowSize = error ("ERROR - File: " ++ filename ++ ", has too many keys.")
+  | keylen < rowSize = error ("ERROR - File: " ++ filename ++ ", has too few keys.")
+  | otherwise = return ()
+
+  where keylen = keyLength keys
+        rowSize = length row
+
+        keyLength :: Keys -> Int
+        keyLength (KeysNT key rest) = 1 + keyLength rest
+        keyLength (KeysT key) = 1
 
 {-|
 Function    : evalFile
@@ -135,7 +160,7 @@ evalKey key keys = evalKeyIndex key keys 0
               | otherwise = evalKeyIndex key rest (i + 1)
           evalKeyIndex key (KeysT fileKey) i 
               | key == fileKey = i
-              | otherwise = error "Key doesn't match."
+              | otherwise = error ("ERROR - Key: " ++ key ++ ", couldn't find a match.")
 
 {-|
 Function    : evalOut 
