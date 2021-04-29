@@ -14,27 +14,27 @@ import Lexer
 
 
 %token
-  input    {TokenInput}
-  out      {TokenOut}
-  where    {TokenWhere}
-  nothing  {TokenNothing}
-  filename {TokenFilename $$}
-  string   {TokenString $$}
-  '?'      {TokenQMark}
-  ':'      {TokenHasColumns}
-  ';'      {TokenTerminator}
-  ','      {TokenKeySep}
-  "=="     {TokenEq}
-  "!="     {TokenNEq}
-  '>'      {TokenGT}
-  ">="     {TokenGEq}
-  '<'      {TokenLT}
-  "<="     {TokenLEq}
-  "&&"     {TokenAnd}
-  "||"     {TokenOr}
-  '"'      {TokenSMark}
-  '('      {TokenLParen}
-  ')'      {TokenRParen}
+  input    { TokenInput _ }
+  out      { TokenOut _ }
+  where    { TokenWhere _ }
+  nothing  { TokenNothing _ }
+  filename { TokenFilename _  $$ }
+  string   { TokenString _  $$ }
+  '?'      { TokenQMark _ }
+  ':'      { TokenHasColumns _ }
+  ';'      { TokenTerminator _ }
+  ','      { TokenKeySep _ }
+  "=="     { TokenEq _ }
+  "!="     { TokenNEq _ }
+  '>'      { TokenGT _ }
+  ">="     { TokenGEq _ }
+  '<'      { TokenLT _ }
+  "<="     { TokenLEq _ }
+  "&&"     { TokenAnd _ }
+  "||"     { TokenOr _ }
+  '"'      { TokenSMark _ }
+  '('      { TokenLParen _ }
+  ')'      { TokenRParen _ }
 
 
 
@@ -108,8 +108,29 @@ Operand : string                             {OperandKey $1}
 --postamble
 
 {
+
 parseError :: [Token] -> a
-parseError ts = error ("Parse Error, unparsed tokens: " ++ (show ts))
+parseError []     = error "Parse Error"
+--parseError (t:ts) = error $ "Unparsed tokens: " ++ show (t:ts)
+parseError (t:ts) = error $ "-------------CSVQL Error---------------\n" ++
+                            "Parse Error at line:column " ++ (tokenPosn t) ++ "\n" ++
+                            suggestion(t:ts) ++ "\n\n\n" ++
+                            "------Corresponding Grammar Error------"
+
+
+suggestion :: [Token] -> String
+suggestion ((TokenFilename _ _):_) = "Filename was unparsed, possible missing ';'"
+suggestion ((TokenOut _):_)        = "OUTPUT statement unparsed, possible missing terminator ';'"
+suggestion ((TokenString _ _):(TokenHasColumns _):_) = "Filename parsed incorrectly, check file name is spelt correctly"
+suggestion ((TokenString _ _):(TokenKeySep _):_) = "Key parsed incorrectly, possible missing key seperator ','"
+suggestion ((TokenString _ s):_) = "Failed to parse " ++ s
+
+
+--showTokens :: [Token] -> Int -> String
+--showTokens (t:[]) _ = show t
+--showTokens (t:ts) 1 = show t
+--showTokens (t:ts) n = show t ++ showTokens ts (n-1)
+
 
 
 data Prog = ProgNW Input Output | ProgW Input Where Output
@@ -151,4 +172,5 @@ data Operand = OperandKey Key | OperandNothing | OperandConst String
 
 data ConditionOp = Eq | NEq | Gt | GEq | Lt | LEq
     deriving (Show, Eq)
+
 }

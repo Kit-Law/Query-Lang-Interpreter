@@ -80,23 +80,23 @@ type Byte = Word8
 -- The input type
 
 
+type AlexInput = (AlexPosn,     -- current position,
+                  Char,         -- previous char
+                  [Byte],       -- pending bytes on current char
+                  String)       -- current input string
 
+ignorePendingBytes :: AlexInput -> AlexInput
+ignorePendingBytes (p,c,_ps,s) = (p,c,[],s)
 
+alexInputPrevChar :: AlexInput -> Char
+alexInputPrevChar (_p,c,_bs,_s) = c
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+alexGetByte :: AlexInput -> Maybe (Byte,AlexInput)
+alexGetByte (p,c,(b:bs),s) = Just (b,(p,c,bs,s))
+alexGetByte (_,_,[],[]) = Nothing
+alexGetByte (p,_,[],(c:s))  = let p' = alexMove p c
+                              in case utf8Encode' c of
+                                   (b, bs) -> p' `seq`  Just (b, (p', c, bs, s))
 
 
 
@@ -169,16 +169,16 @@ type Byte = Word8
 -- assuming the usual eight character tab stops.
 
 
+data AlexPosn = AlexPn !Int !Int !Int
+        deriving (Eq,Show)
 
+alexStartPos :: AlexPosn
+alexStartPos = AlexPn 0 1 1
 
-
-
-
-
-
-
-
-
+alexMove :: AlexPosn -> Char -> AlexPosn
+alexMove (AlexPn a l c) '\t' = AlexPn (a+1)  l     (c+alex_tab_size-((c-1) `mod` alex_tab_size))
+alexMove (AlexPn a l _) '\n' = AlexPn (a+1) (l+1)   1
+alexMove (AlexPn a l c) _    = AlexPn (a+1)  l     (c+1)
 
 
 -- -----------------------------------------------------------------------------
@@ -340,25 +340,25 @@ type Byte = Word8
 -- Basic wrapper
 
 
-type AlexInput = (Char,[Byte],String)
 
-alexInputPrevChar :: AlexInput -> Char
-alexInputPrevChar (c,_,_) = c
 
--- alexScanTokens :: String -> [token]
-alexScanTokens str = go ('\n',[],str)
-  where go inp__@(_,_bs,s) =
-          case alexScan inp__ 0 of
-                AlexEOF -> []
-                AlexError _ -> error "lexical error"
-                AlexSkip  inp__' _ln     -> go inp__'
-                AlexToken inp__' len act -> act (take len s) : go inp__'
 
-alexGetByte :: AlexInput -> Maybe (Byte,AlexInput)
-alexGetByte (c,(b:bs),s) = Just (b,(c,bs,s))
-alexGetByte (_,[],[])    = Nothing
-alexGetByte (_,[],(c:s)) = case utf8Encode' c of
-                             (b, bs) -> Just (b, (c, bs, s))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -402,14 +402,14 @@ alexGetByte (_,[],(c:s)) = case utf8Encode' c of
 -- Adds text positions to the basic model.
 
 
-
-
-
-
-
-
-
-
+--alexScanTokens :: String -> [token]
+alexScanTokens str0 = go (alexStartPos,'\n',[],str0)
+  where go inp__@(pos,_,_,str) =
+          case alexScan inp__ 0 of
+                AlexEOF -> []
+                AlexError ((AlexPn _ line column),_,_,_) -> error $ "lexical error at line " ++ (show line) ++ ", column " ++ (show column)
+                AlexSkip  inp__' _ln     -> go inp__'
+                AlexToken inp__' len act -> act pos (take len str) : go inp__'
 
 
 
@@ -6284,54 +6284,80 @@ alex_actions = array (0 :: Int, 37)
   ]
 
 {-# LINE 47 "Lexer.x" #-}
- 
--- Each action has type :: String -> Token 
+
+
+-- Each action has type :: AlexPosn -> String -> Token 
 -- The token type: 
 data Token = 
-  TokenInput           | 
-  TokenOut             | 
-  TokenWhere           |
-  TokenNothing         |
-  TokenFilename String |
-  TokenString String   |
-  TokenQMark           |
-  TokenHasColumns      |
-  TokenTerminator      |
-  TokenKeySep          |
-  TokenEq              |
-  TokenNEq             |
-  TokenSMark           |
-  TokenGT              |
-  TokenGEq             |
-  TokenLT              |
-  TokenLEq             |
-  TokenAnd             |
-  TokenOr              |
-  TokenLParen          |
-  TokenRParen
+  TokenInput      AlexPosn        | 
+  TokenOut        AlexPosn        | 
+  TokenWhere      AlexPosn        |
+  TokenNothing    AlexPosn        |
+  TokenFilename   AlexPosn String |
+  TokenString     AlexPosn String |
+  TokenQMark      AlexPosn        |
+  TokenHasColumns AlexPosn        |
+  TokenTerminator AlexPosn        |
+  TokenKeySep     AlexPosn        |
+  TokenEq         AlexPosn        |
+  TokenNEq        AlexPosn        |
+  TokenSMark      AlexPosn        |
+  TokenGT         AlexPosn        |
+  TokenGEq        AlexPosn        |
+  TokenLT         AlexPosn        |
+  TokenLEq        AlexPosn        |
+  TokenAnd        AlexPosn        |
+  TokenOr         AlexPosn        |
+  TokenLParen     AlexPosn        |
+  TokenRParen     AlexPosn
   deriving (Eq,Show)
 
-alex_action_2 =  \s -> TokenInput 
-alex_action_3 =  \s -> TokenOut 
-alex_action_4 =  \s -> TokenWhere 
-alex_action_5 =  \s -> TokenNothing 
-alex_action_6 =  \s -> TokenFilename s 
-alex_action_7 =  \s -> TokenQMark 
-alex_action_8 =  \s -> TokenHasColumns 
-alex_action_9 =  \s -> TokenTerminator 
-alex_action_10 =  \s -> TokenKeySep 
-alex_action_11 =  \s -> TokenEq 
-alex_action_12 =  \s -> TokenNEq 
-alex_action_13 =  \s -> TokenGT 
-alex_action_14 =  \s -> TokenGEq 
-alex_action_15 =  \s -> TokenLEq 
-alex_action_16 =  \s -> TokenLT 
-alex_action_17 =  \s -> TokenAnd 
-alex_action_18 =  \s -> TokenOr 
-alex_action_19 =  \s -> TokenSMark 
-alex_action_20 =  \s -> TokenLParen 
-alex_action_21 =  \s -> TokenRParen 
-alex_action_22 =  \s -> TokenString s 
+
+tokenPosn :: Token -> String
+tokenPosn (TokenInput (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenOut (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenWhere (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenNothing (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenFilename (AlexPn a l c) _) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenString (AlexPn a l c) _) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenQMark (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenHasColumns (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenTerminator (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenKeySep (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenEq (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenNEq (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenSMark (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenGT (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenGEq (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenLT (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenLEq (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenAnd (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenOr (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenLParen (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenRParen (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+
+
+alex_action_2 =  \p s -> TokenInput p 
+alex_action_3 =  \p s -> TokenOut p 
+alex_action_4 =  \p s -> TokenWhere p 
+alex_action_5 =  \p s -> TokenNothing p 
+alex_action_6 =  \p s -> TokenFilename p s 
+alex_action_7 =  \p s -> TokenQMark p 
+alex_action_8 =  \p s -> TokenHasColumns p 
+alex_action_9 =  \p s -> TokenTerminator p 
+alex_action_10 =  \p s -> TokenKeySep p 
+alex_action_11 =  \p s -> TokenEq p 
+alex_action_12 =  \p s -> TokenNEq p 
+alex_action_13 =  \p s -> TokenGT p 
+alex_action_14 =  \p s -> TokenGEq p 
+alex_action_15 =  \p s -> TokenLEq p 
+alex_action_16 =  \p s -> TokenLT p 
+alex_action_17 =  \p s -> TokenAnd p 
+alex_action_18 =  \p s -> TokenOr p 
+alex_action_19 =  \p s -> TokenSMark p 
+alex_action_20 =  \p s -> TokenLParen p 
+alex_action_21 =  \p s -> TokenRParen p 
+alex_action_22 =  \p s -> TokenString p s 
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 -- -----------------------------------------------------------------------------
 -- ALEX TEMPLATE

@@ -58,8 +58,12 @@ Portability : WOCA
 -}
 checkKeys :: Table -> CsvFile -> IO ()
 checkKeys (keys, (row:_)) (File filename _)
-  | keylen > rowSize = error ("ERROR - File: " ++ filename ++ ", has too many keys.")
-  | keylen < rowSize = error ("ERROR - File: " ++ filename ++ ", has too few keys.")
+  | keylen > rowSize = error $ "-------------CSVQL Error---------------\n" ++
+                              "Runtime Error - File: " ++ filename ++ ", not enough rows."
+                              ++ "\n\n" ++ "------Corresponding Evaluator Error------"
+  | keylen < rowSize = error $ "-------------CSVQL Error---------------\n" ++
+                              "Runtime Error - File: " ++ filename ++ ", too many rows."
+                              ++ "\n\n" ++ "------Corresponding Evaluator Error------"
   | otherwise = return ()
 
   where keylen = keyLength keys
@@ -160,7 +164,9 @@ evalKey key keys = evalKeyIndex key keys 0
               | otherwise = evalKeyIndex key rest (i + 1)
           evalKeyIndex key (KeysT fileKey) i 
               | key == fileKey = i
-              | otherwise = error ("ERROR - Key: " ++ key ++ ", couldn't find a match.")
+              | otherwise = error $ "-------------CSVQL Error---------------\n" ++
+                                  "Runtime Error - Key: " ++ key ++ ", couldn't find a match."
+                                  ++ "\n\n" ++ "------Corresponding Evaluator Error------"
 
 {-|
 Function    : evalOut 

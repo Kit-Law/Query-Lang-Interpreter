@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ffbf9fb526e9e04ee4d02147bd49d9aaf62151876a641b320bc5f1621ce05e19
+-- hash: a5e3283036ec6a10c5bde2daf1ac19af6b5ae4dfd0d6ad33e63b6e33b4dab791
 
 name:           Query-Lang-Interpreter
 version:        0.1.0.0
@@ -19,7 +19,6 @@ license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
-    ChangeLog.md
 
 source-repository head
   type: git

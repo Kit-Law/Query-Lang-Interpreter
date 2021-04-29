@@ -6,11 +6,11 @@ import qualified Data.Bits as Bits
 import Control.Applicative(Applicative(..))
 import Control.Monad (ap)
 
--- parser produced by Happy Version 1.19.12
+-- parser produced by Happy Version 1.20.0
 
 data HappyAbsSyn t4 t5 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15
 	= HappyTerminal (Token)
-	| HappyErrorToken Int
+	| HappyErrorToken Prelude.Int
 	| HappyAbsSyn4 t4
 	| HappyAbsSyn5 t5
 	| HappyAbsSyn6 t6
@@ -24,7 +24,7 @@ data HappyAbsSyn t4 t5 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15
 	| HappyAbsSyn14 t14
 	| HappyAbsSyn15 t15
 
-happyExpList :: Happy_Data_Array.Array Int Int
+happyExpList :: Happy_Data_Array.Array Prelude.Int Prelude.Int
 happyExpList = Happy_Data_Array.listArray (0,143) ([32768,0,0,16,0,8192,0,0,0,0,128,0,1536,0,0,32,0,512,0,512,0,8192,0,0,80,24,2048,0,32768,0,0,40,12,0,0,0,8,0,0,0,1024,48,0,0,0,16128,0,0,0,0,0,0,4,0,160,48,0,0,0,0,0,1024,0,0,192,0,0,0,0,0,1024,0,40960,12288,0,0,0,0,64,20480,6144,0,10,3,256,0,0,4864,0,32768,0,160,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1024,0,40960,12288,0,0,0,2048,0,0,0,0,0,0,0,0,0,0,0,8192,0,0,0,0,0,0,2,0,0,0,0
 	])
 
@@ -32,14 +32,14 @@ happyExpList = Happy_Data_Array.listArray (0,143) ([32768,0,0,16,0,8192,0,0,0,0,
 happyExpListPerState st =
     token_strs_expected
   where token_strs = ["error","%dummy","%start_parser","Prog","InputExp","OutExp","OutArg","CSV_File","Keys","WhereExp","InlineIf","Conditions","Condition","ConditionOp","Operand","input","out","where","nothing","filename","string","'?'","':'","';'","','","\"==\"","\"!=\"","'>'","\">=\"","'<'","\"<=\"","\"&&\"","\"||\"","'\"'","'('","')'","%eof"]
-        bit_start = st * 37
-        bit_end = (st + 1) * 37
+        bit_start = st Prelude.* 37
+        bit_end = (st Prelude.+ 1) Prelude.* 37
         read_bit = readArrayBit happyExpList
-        bits = map read_bit [bit_start..bit_end - 1]
-        bits_indexed = zip bits [0..36]
-        token_strs_expected = concatMap f bits_indexed
-        f (False, _) = []
-        f (True, nr) = [token_strs !! nr]
+        bits = Prelude.map read_bit [bit_start..bit_end Prelude.- 1]
+        bits_indexed = Prelude.zip bits [0..36]
+        token_strs_expected = Prelude.concatMap f bits_indexed
+        f (Prelude.False, _) = []
+        f (Prelude.True, nr) = [token_strs Prelude.!! nr]
 
 action_0 (16) = happyShift action_4
 action_0 (4) = happyGoto action_3
@@ -351,7 +351,7 @@ happyReduction_7 (HappyAbsSyn11  happy_var_1)
 happyReduction_7 _  = notHappyAtAll 
 
 happyReduce_8 = happySpecReduce_1  7 happyReduction_8
-happyReduction_8 (HappyTerminal (TokenString happy_var_1))
+happyReduction_8 (HappyTerminal (TokenString _  happy_var_1))
 	 =  HappyAbsSyn7
 		 (OutArgKey happy_var_1
 	)
@@ -359,7 +359,7 @@ happyReduction_8 _  = notHappyAtAll
 
 happyReduce_9 = happySpecReduce_3  7 happyReduction_9
 happyReduction_9 _
-	(HappyTerminal (TokenString happy_var_2))
+	(HappyTerminal (TokenString _  happy_var_2))
 	_
 	 =  HappyAbsSyn7
 		 (OutArgConst happy_var_2
@@ -375,7 +375,7 @@ happyReduction_10 _
 happyReduce_11 = happySpecReduce_3  8 happyReduction_11
 happyReduction_11 (HappyAbsSyn9  happy_var_3)
 	_
-	(HappyTerminal (TokenFilename happy_var_1))
+	(HappyTerminal (TokenFilename _  happy_var_1))
 	 =  HappyAbsSyn8
 		 (File happy_var_1 happy_var_3
 	)
@@ -384,14 +384,14 @@ happyReduction_11 _ _ _  = notHappyAtAll
 happyReduce_12 = happySpecReduce_3  9 happyReduction_12
 happyReduction_12 (HappyAbsSyn9  happy_var_3)
 	_
-	(HappyTerminal (TokenString happy_var_1))
+	(HappyTerminal (TokenString _  happy_var_1))
 	 =  HappyAbsSyn9
 		 (KeysNT happy_var_1 happy_var_3
 	)
 happyReduction_12 _ _ _  = notHappyAtAll 
 
 happyReduce_13 = happySpecReduce_1  9 happyReduction_13
-happyReduction_13 (HappyTerminal (TokenString happy_var_1))
+happyReduction_13 (HappyTerminal (TokenString _  happy_var_1))
 	 =  HappyAbsSyn9
 		 (KeysT happy_var_1
 	)
@@ -406,9 +406,9 @@ happyReduction_14 (HappyAbsSyn12  happy_var_2)
 happyReduction_14 _ _  = notHappyAtAll 
 
 happyReduce_15 = happyReduce 5 11 happyReduction_15
-happyReduction_15 ((HappyTerminal (TokenString happy_var_5)) `HappyStk`
+happyReduction_15 ((HappyTerminal (TokenString _  happy_var_5)) `HappyStk`
 	_ `HappyStk`
-	(HappyTerminal (TokenString happy_var_3)) `HappyStk`
+	(HappyTerminal (TokenString _  happy_var_3)) `HappyStk`
 	_ `HappyStk`
 	(HappyAbsSyn12  happy_var_1) `HappyStk`
 	happyRest)
@@ -496,7 +496,7 @@ happyReduction_26 _
 	)
 
 happyReduce_27 = happySpecReduce_1  15 happyReduction_27
-happyReduction_27 (HappyTerminal (TokenString happy_var_1))
+happyReduction_27 (HappyTerminal (TokenString _  happy_var_1))
 	 =  HappyAbsSyn15
 		 (OperandKey happy_var_1
 	)
@@ -510,7 +510,7 @@ happyReduction_28 _
 
 happyReduce_29 = happySpecReduce_3  15 happyReduction_29
 happyReduction_29 _
-	(HappyTerminal (TokenString happy_var_2))
+	(HappyTerminal (TokenString _  happy_var_2))
 	_
 	 =  HappyAbsSyn15
 		 (OperandConst happy_var_2
@@ -523,27 +523,27 @@ happyNewToken action sts stk [] =
 happyNewToken action sts stk (tk:tks) =
 	let cont i = action i i tk (HappyState action) sts stk tks in
 	case tk of {
-	TokenInput -> cont 16;
-	TokenOut -> cont 17;
-	TokenWhere -> cont 18;
-	TokenNothing -> cont 19;
-	TokenFilename happy_dollar_dollar -> cont 20;
-	TokenString happy_dollar_dollar -> cont 21;
-	TokenQMark -> cont 22;
-	TokenHasColumns -> cont 23;
-	TokenTerminator -> cont 24;
-	TokenKeySep -> cont 25;
-	TokenEq -> cont 26;
-	TokenNEq -> cont 27;
-	TokenGT -> cont 28;
-	TokenGEq -> cont 29;
-	TokenLT -> cont 30;
-	TokenLEq -> cont 31;
-	TokenAnd -> cont 32;
-	TokenOr -> cont 33;
-	TokenSMark -> cont 34;
-	TokenLParen -> cont 35;
-	TokenRParen -> cont 36;
+	TokenInput _ -> cont 16;
+	TokenOut _ -> cont 17;
+	TokenWhere _ -> cont 18;
+	TokenNothing _ -> cont 19;
+	TokenFilename _  happy_dollar_dollar -> cont 20;
+	TokenString _  happy_dollar_dollar -> cont 21;
+	TokenQMark _ -> cont 22;
+	TokenHasColumns _ -> cont 23;
+	TokenTerminator _ -> cont 24;
+	TokenKeySep _ -> cont 25;
+	TokenEq _ -> cont 26;
+	TokenNEq _ -> cont 27;
+	TokenGT _ -> cont 28;
+	TokenGEq _ -> cont 29;
+	TokenLT _ -> cont 30;
+	TokenLEq _ -> cont 31;
+	TokenAnd _ -> cont 32;
+	TokenOr _ -> cont 33;
+	TokenSMark _ -> cont 34;
+	TokenLParen _ -> cont 35;
+	TokenRParen _ -> cont 36;
 	_ -> happyError' ((tk:tks), [])
 	}
 
@@ -554,25 +554,25 @@ newtype HappyIdentity a = HappyIdentity a
 happyIdentity = HappyIdentity
 happyRunIdentity (HappyIdentity a) = a
 
-instance Functor HappyIdentity where
+instance Prelude.Functor HappyIdentity where
     fmap f (HappyIdentity a) = HappyIdentity (f a)
 
 instance Applicative HappyIdentity where
     pure  = HappyIdentity
     (<*>) = ap
-instance Monad HappyIdentity where
+instance Prelude.Monad HappyIdentity where
     return = pure
     (HappyIdentity p) >>= q = q p
 
 happyThen :: () => HappyIdentity a -> (a -> HappyIdentity b) -> HappyIdentity b
-happyThen = (>>=)
+happyThen = (Prelude.>>=)
 happyReturn :: () => a -> HappyIdentity a
-happyReturn = (return)
-happyThen1 m k tks = (>>=) m (\a -> k a tks)
+happyReturn = (Prelude.return)
+happyThen1 m k tks = (Prelude.>>=) m (\a -> k a tks)
 happyReturn1 :: () => a -> b -> HappyIdentity a
-happyReturn1 = \a tks -> (return) a
-happyError' :: () => ([(Token)], [String]) -> HappyIdentity a
-happyError' = HappyIdentity . (\(tokens, _) -> parseError tokens)
+happyReturn1 = \a tks -> (Prelude.return) a
+happyError' :: () => ([(Token)], [Prelude.String]) -> HappyIdentity a
+happyError' = HappyIdentity Prelude.. (\(tokens, _) -> parseError tokens)
 parser tks = happyRunIdentity happySomeParser where
  happySomeParser = happyThen (happyParse action_0 tks) (\x -> case x of {HappyAbsSyn4 z -> happyReturn z; _other -> notHappyAtAll })
 
@@ -580,7 +580,27 @@ happySeq = happyDontSeq
 
 
 parseError :: [Token] -> a
-parseError ts = error ("Parse Error, unparsed tokens: " ++ (show ts))
+parseError []     = error "Parse Error"
+--parseError (t:ts) = error $ "Unparsed tokens: " ++ show (t:ts)
+parseError (t:ts) = error $ "-------------CSVQL Error---------------\n" ++
+                            "Parse Error at line:column " ++ (tokenPosn t) ++ "\n" ++
+                            suggestion(t:ts) ++ "\n\n\n" ++
+                            "------Corresponding Grammar Error------"
+
+
+suggestion :: [Token] -> String
+suggestion ((TokenFilename _ _):_) = "Filename was unparsed, possible missing ';'"
+suggestion ((TokenOut _):_)        = "OUTPUT statement unparsed, possible missing terminator ';'"
+suggestion ((TokenString _ _):(TokenHasColumns _):_) = "Filename parsed incorrectly, check file name is spelt correctly"
+suggestion ((TokenString _ _):(TokenKeySep _):_) = "Key parsed incorrectly, possible missing key seperator ','"
+suggestion ((TokenString _ s):_) = "Failed to parse " ++ s
+
+
+--showTokens :: [Token] -> Int -> String
+--showTokens (t:[]) _ = show t
+--showTokens (t:ts) 1 = show t
+--showTokens (t:ts) n = show t ++ showTokens ts (n-1)
+
 
 
 data Prog = ProgNW Input Output | ProgW Input Where Output
@@ -666,7 +686,7 @@ data ConditionOp = Eq | NEq | Gt | GEq | Lt | LEq
 
 
 
-data Happy_IntList = HappyCons Int Happy_IntList
+data Happy_IntList = HappyCons Prelude.Int Happy_IntList
 
 
 
@@ -773,7 +793,7 @@ indexShortOffAddr arr off = arr Happy_Data_Array.! off
 
 
 {-# INLINE happyLt #-}
-happyLt x y = (x < y)
+happyLt x y = (x Prelude.< y)
 
 
 
@@ -781,7 +801,7 @@ happyLt x y = (x < y)
 
 
 readArrayBit arr bit =
-    Bits.testBit (indexShortOffAddr arr (bit `div` 16)) (bit `mod` 16)
+    Bits.testBit (indexShortOffAddr arr (bit `Prelude.div` 16)) (bit `Prelude.mod` 16)
 
 
 
@@ -794,8 +814,8 @@ readArrayBit arr bit =
 
 
 newtype HappyState b c = HappyState
-        (Int ->                    -- token number
-         Int ->                    -- token number (yes, again)
+        (Prelude.Int ->                    -- token number
+         Prelude.Int ->                    -- token number (yes, again)
          b ->                           -- token semantic value
          HappyState b c ->              -- current state
          [HappyState b c] ->            -- state stack
@@ -842,7 +862,7 @@ happySpecReduce_3 nt fn j tk _ ((_):(((_):(sts@(((st@(HappyState (action))):(_))
 happyReduce k i fn (1) tk st sts stk
      = happyFail [] (1) tk st sts stk
 happyReduce k nt fn j tk st sts stk
-     = case happyDrop (k - ((1) :: Int)) sts of
+     = case happyDrop (k Prelude.- ((1) :: Prelude.Int)) sts of
          sts1@(((st1@(HappyState (action))):(_))) ->
                 let r = fn stk in  -- it doesn't hurt to always seq here...
                 happyDoSeq r (action nt j tk st1 sts1 r)
@@ -866,17 +886,17 @@ happyMonad2Reduce k nt fn j tk st sts stk =
 
 
 
-             _ = nt :: Int
+             _ = nt :: Prelude.Int
              new_state = action
 
           in
           happyThen1 (fn stk tk) (\r -> happyNewToken new_state sts1 (r `HappyStk` drop_stk))
 
 happyDrop (0) l = l
-happyDrop n ((_):(t)) = happyDrop (n - ((1) :: Int)) t
+happyDrop n ((_):(t)) = happyDrop (n Prelude.- ((1) :: Prelude.Int)) t
 
 happyDropStk (0) l = l
-happyDropStk n (x `HappyStk` xs) = happyDropStk (n - ((1)::Int)) xs
+happyDropStk n (x `HappyStk` xs) = happyDropStk (n Prelude.- ((1)::Prelude.Int)) xs
 
 -----------------------------------------------------------------------------
 -- Moving to a new state after a reduction
@@ -921,7 +941,7 @@ happyFail explist i tk (HappyState (action)) sts stk =
 -- Internal happy errors:
 
 notHappyAtAll :: a
-notHappyAtAll = error "Internal Happy error\n"
+notHappyAtAll = Prelude.error "Internal Happy error\n"
 
 -----------------------------------------------------------------------------
 -- Hack to get the typechecker to accept our action functions
@@ -939,7 +959,7 @@ notHappyAtAll = error "Internal Happy error\n"
 --      happySeq = happyDontSeq
 
 happyDoSeq, happyDontSeq :: a -> b -> b
-happyDoSeq   a b = a `seq` b
+happyDoSeq   a b = a `Prelude.seq` b
 happyDontSeq a b = b
 
 -----------------------------------------------------------------------------
